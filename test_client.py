@@ -20,6 +20,46 @@ QUESTION = (
 )
 
 
+def _part_text(part: object) -> str:
+    inner = getattr(part, "root", part)
+    return getattr(inner, "text", "") or ""
+
+
+def _message_text(message: object | None) -> str:
+    if message is None:
+        return ""
+    return "".join(_part_text(part) for part in (getattr(message, "parts", []) or []))
+
+
+def _extract_response_text(response: object) -> str:
+    """Extract text from successful artifacts, direct messages, or failed task status."""
+    root = getattr(response, "root", response)
+    result = getattr(root, "result", None)
+    if result is None:
+        return ""
+
+    chunks: list[str] = []
+
+    artifacts = getattr(result, "artifacts", None)
+    if artifacts:
+        for artifact in artifacts:
+            for part in getattr(artifact, "parts", []) or []:
+                chunks.append(_part_text(part))
+
+    for part in getattr(result, "parts", []) or []:
+        chunks.append(_part_text(part))
+
+    status = getattr(result, "status", None)
+    if status is not None:
+        chunks.append(_message_text(getattr(status, "message", None)))
+
+    if not any(chunks):
+        for msg in getattr(result, "history", []) or []:
+            chunks.append(_message_text(msg))
+
+    return "".join(chunks)
+
+
 async def main() -> None:
     print(f"Connecting to Customer Agent at {CUSTOMER_AGENT_URL}")
     print(f"Question: {QUESTION}")
@@ -37,7 +77,7 @@ async def main() -> None:
             print("Make sure all services are running (./start_all.sh)")
             sys.exit(1)
 
-        from a2a.types import AgentCard, Message, Part, Role, TextPart, MessageSendParams
+        from a2a.types import AgentCard, Message, Part, Role, TextPart
         from a2a.client import A2AClient
         from uuid import uuid4
 
@@ -63,25 +103,7 @@ async def main() -> None:
         print("Sending request (this may take 30-60s while agents chain)...\n")
         response = await client.send_message(request)
 
-        # Parse response
-        result_text = ""
-        if hasattr(response, "root"):
-            root = response.root
-            if hasattr(root, "result"):
-                result = root.result
-                # Task with artifacts
-                if hasattr(result, "artifacts") and result.artifacts:
-                    for artifact in result.artifacts:
-                        for part in artifact.parts:
-                            p = part.root if hasattr(part, "root") else part
-                            if hasattr(p, "text"):
-                                result_text += p.text
-                # Message with parts
-                elif hasattr(result, "parts") and result.parts:
-                    for part in result.parts:
-                        p = part.root if hasattr(part, "root") else part
-                        if hasattr(p, "text"):
-                            result_text += p.text
+        result_text = _extract_response_text(response)
 
         if result_text:
             print("RESPONSE:")

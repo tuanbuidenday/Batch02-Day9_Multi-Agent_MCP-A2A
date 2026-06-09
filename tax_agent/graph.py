@@ -32,6 +32,9 @@ When answering, be precise about:
 
 Always note that your response is for educational purposes and the user
 should consult a licensed attorney for specific legal advice.
+
+Keep responses concise: use at most 5 bullet points, avoid long background
+explanations, and lead with the most important tax consequence.
 """
 
 

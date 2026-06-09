@@ -86,6 +86,24 @@ Tạo tool gọi API thực (ví dụ: tra cứu luật từ database online).
 ### Challenge 4: Error Handling
 Thêm try-catch và retry logic khi tool fails.
 
+**File đã hoàn thành:** `exercise_optional_challenges.py`
+
+**Đã implement:**
+1. `financial_agent` để phân tích thiệt hại tài chính và chi phí khắc phục.
+2. `ConversationMemory` lưu/đọc lịch sử hội thoại trong `.conversation_memory.json`.
+3. `lookup_public_legal_source` gọi CourtListener public API, có fallback khi network/API lỗi.
+4. `invoke_llm_with_retry` có retry và fallback khi LLM/API provider lỗi.
+
+**Chạy:**
+```bash
+uv run python exercises/exercise_optional_challenges.py
+```
+
+Nếu máy không có `uv` nhưng đã cài `.venv`:
+```bash
+.venv/bin/python exercises/exercise_optional_challenges.py
+```
+
 ---
 
 ## Câu Hỏi Thường Gặp

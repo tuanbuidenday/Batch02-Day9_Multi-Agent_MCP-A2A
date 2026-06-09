@@ -1,5 +1,6 @@
 .venv
 .env
+exercises/.conversation_memory.json
 **cache**
 .claude
 **SOLUTION**
